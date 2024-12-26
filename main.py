@@ -1,6 +1,7 @@
 import time
 import asyncio
 import httpx
+import json
 from url_filterer import URLFilterer
 from url_parser import UrlParser
 from crawler import Crawler

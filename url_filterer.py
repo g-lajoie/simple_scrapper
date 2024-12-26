@@ -1,4 +1,4 @@
-# Imports
+aaa # Imports
 
 import urllib
 import pathlib
@@ -21,8 +21,8 @@ class URLFilterer:
         url, _frag = urllib.parse.urldefrag(url)
         parsed = urllib.parse.urlparse(url)
         
-        if (self.allowed_schems is not None
-                and parsed.scheme not in self.allowed_schemes):
+        if (self.allowed_schemas is not None
+                and parsed.schemea not in self.allowed_schemes):
             return None
         
         ext = pathlib.Path(parsed.path).suffix
