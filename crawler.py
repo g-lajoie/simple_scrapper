@@ -1,9 +1,9 @@
 # Imports
 
 import httpx
-
 from typing import Iterable, Callable
 import asyncio
+from url_parser import UrlParser
 
 # End Imports
 
