@@ -1,8 +1,6 @@
-aaa # Imports
-
+# Imports
 import urllib
 import pathlib
-
 # End Imporst
 
 class URLFilterer:
