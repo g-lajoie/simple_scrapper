@@ -1,11 +1,11 @@
 # Imports
 
-import html
+from html.parser import HTMLParser
 from typing import Callable
 
 # End Imports
 
-class UrlParser(html.parser.HTMLParser):
+class UrlParser(HTMLParser):
     def __init__(
         self, 
         base:str, 

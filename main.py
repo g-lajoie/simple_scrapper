@@ -1,4 +1,5 @@
 import time
+import asyncio
 import httpx
 from url_filterer import URLFilterer
 from url_parser import UrlParser
@@ -7,7 +8,7 @@ from crawler import Crawler
 async def main():
     filterer = URLFilterer(
         allowed_domains = {"mcoding.io"},
-        allowed_schemes = {"http", "https"},
+        allowed_schemas = {"http", "https"},
         allowed_filetypes = {".html", ".php", ""}
     )
     
@@ -15,9 +16,9 @@ async def main():
     async with httpx.AsyncClient() as client:
         crawler = Crawler(
             client = client,
-            url = ['http://mcoding.io/'],
+            urls = ['http://mcoding.io/'],
             filter_url = filterer.filter_url,
-            worker = 5,
+            workers = 5,
             limit = 30
         )
 

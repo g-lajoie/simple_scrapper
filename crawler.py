@@ -61,7 +61,7 @@ class Crawler:
             except asyncio.CancelledError:
                 return
             
-    async def proocess_one(self):
+    async def process_one(self):
         url = await self.todo.get()
         
         try:
