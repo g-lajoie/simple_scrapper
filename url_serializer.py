@@ -1,5 +1,7 @@
+# Imports
 from abc import ABC, abstractmethod
 from urllib.parse import urlparse
+# End Imports
 
 class ISerializer(ABC):
 
@@ -35,4 +37,4 @@ class UrlSerializer:
     def hostname(self):
         return self.parse_url(self.url).hostname
 
-    
+
