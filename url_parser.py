@@ -1,5 +1,9 @@
+# Imports
+
 import html
 from typing import Callable
+
+# End Imports
 
 class UrlParser(html.parser.HTMLParser):
     def __init__(

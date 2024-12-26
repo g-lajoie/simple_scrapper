@@ -20,3 +20,19 @@ async def main():
             worker = 5,
             limit = 30
         )
+
+        await crawler.run()
+
+    end = time.perf_counter()
+
+    seen = sorted(crawler.seen)
+    print("Results:")
+    for url in seen:
+        print(url)
+
+    print(f"Crawled: {len(crawler.done)} URLs")
+    print(f"Found: {len(seen)} URLs")
+    print(f"Done in {end - start:.2f}s")
+
+if __name__ == "__main__":
+    asyncio.run(main(), debug = True)
