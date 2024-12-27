@@ -1,33 +1,30 @@
+# Imports
 import time
 import asyncio
 import httpx
 import json
-from url_filterer import URLFilterer
-from url_parser import UrlParser
+from typing import Iterable
+
 from crawler import Crawler
+# End Imports
 
 async def main():
-    filterer = URLFilterer(
-        allowed_domains = {"mcoding.io"},
-        allowed_schemas = {"http", "https"},
-        allowed_filetypes = {".html", ".php", ""}
-    )
     
-    start = time.perf_counter()
+    with open('websites.json', 'r') as json_file:
+        websites = json.load(json_file)    
+    
     async with httpx.AsyncClient() as client:
         crawler = Crawler(
             client = client,
-            urls = ['http://mcoding.io/'],
-            filter_url = filterer.filter_url,
+            urls = websites,
             workers = 5,
             limit = 30
         )
 
         await crawler.run()
 
-    end = time.perf_counter()
-
     seen = sorted(crawler.seen)
+    
     print("Results:")
     for url in seen:
         print(url)

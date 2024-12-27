@@ -1,10 +1,9 @@
 # Imports
-
 import httpx
 from typing import Iterable, Callable
 import asyncio
-from url_parser import UrlParser
 
+from url_parser import UrlParser
 # End Imports
 
 class Crawler:
@@ -30,9 +29,11 @@ class Crawler:
         
     async def run(self):
         await self.on_found_links(self.start_urls)
+        
         workers = [
             asyncio.create_task(self.worker()) for _ in range(self.num_workers)
         ]
+        
         await self.todo.join()
         
         for worker in workers:
@@ -58,6 +59,7 @@ class Crawler:
         while True:
             try:
                 await self.process_one()
+                
             except asyncio.CancelledError:
                 return
             

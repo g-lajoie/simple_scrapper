@@ -3,7 +3,7 @@ import urllib
 import pathlib
 # End Imporst
 
-class URLFilterer:
+class UrlFilterer:
     def __init__(
         self,
         allowed_domains:set[str] | None = None,
