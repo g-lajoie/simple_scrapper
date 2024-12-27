@@ -3,7 +3,7 @@ import httpx
 from typing import Iterable, Callable
 import asyncio
 
-from url_parser import UrlParser
+from .url_parser import UrlParser
 # End Imports
 
 class Crawler:
@@ -11,7 +11,7 @@ class Crawler:
         self,
         client: httpx.AsyncClient,
         urls: Iterable[str],
-        filter_url: Callable[[str, str], str | None],
+        filter_url: Callable[[str, str], str | None] = None,
         workers:int = 10,
         limit:int = 25
     ):

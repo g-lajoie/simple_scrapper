@@ -11,7 +11,9 @@ from crawler import Crawler
 async def main():
     
     with open('websites.json', 'r') as json_file:
-        websites = json.load(json_file)    
+        websites = json.load(json_file)  
+        
+    print(websites)  
     
     async with httpx.AsyncClient() as client:
         crawler = Crawler(
@@ -31,7 +33,6 @@ async def main():
 
     print(f"Crawled: {len(crawler.done)} URLs")
     print(f"Found: {len(seen)} URLs")
-    print(f"Done in {end - start:.2f}s")
 
 if __name__ == "__main__":
     asyncio.run(main(), debug = True)
