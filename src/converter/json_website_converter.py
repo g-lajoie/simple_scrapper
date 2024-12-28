@@ -1,9 +1,17 @@
+# Imports
+from .website_converter import IWebsiteConverter
+import re
+from typing import List
+
+# End Imports
+
+
 class JsonWebsiteConverter(IWebsiteConverter):
     
     def __init__(self):
+        pass
         
-        
-    def create_websites_from_json(self):
+    def create_websites(self) -> List:
         """Create a list of websites from the self.from_json attribute.
         
         The from_json attributes takes a file that has been deserailized (converted to python dictionary), using the
