@@ -80,7 +80,7 @@ class JsonWebsiteConverter(IWebsiteConverter):
         websites = self.__file_data.values() 
         
         if not isinstance(websites):
-            raise TypeError(f"Expected type:List got type:{type(website_list)}")
+            raise TypeError(f"Expected type:List got type:{type(websites)}")
         
         # Check top level domain to make sure item is a website.
         search_result = bool(re.search(r"\.com|\.org|\.edu|\.net", websites, re.IGNORECASE))
