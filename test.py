@@ -13,8 +13,12 @@ with open("websites.json", 'r') as file:
 first_website = json_data['websites'][0]
 
 # Request website data
+response = requests.get(first_website)
 
-with open(first_website) as fp:
-    soup = BeautifulSoup(fp, 'lxml')
+# Check if Status Code was successful and return data
+if response.status_code == 200:
+    soup = BeautifulSoup(response.text, 'lxml')
+    print(soup.prettify())
     
-print(soup)
+else:
+    print(f'{response.code}: Failed to fetch {first_website}')
