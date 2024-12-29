@@ -20,10 +20,11 @@ class MainQueue(asyncio.Queue):
             super().__init__()
             self._intialized = True
             
-    async def insert_website_list(website_list:List[str]):
+    async def insert_website_list(self, website_list:List[str]):
         """ Inserts a list of website into the main queue"""
-        _ = [super().put(item) for item in website_list]
+        for item in website_list:
+            await super().put(item)
     
-    async def insert_website(website:str):
+    async def insert_website(self, website:str):
         """ Insert a single website into the main queue."""
-        super().put(website)
+        await super().put(website)

@@ -7,6 +7,6 @@ from typing import Dict
 class IWebsiteConverter:
     
     @abstractmethod
-    def create_website():
+    def create_website_list():
         "Implement create list method in child class"
         

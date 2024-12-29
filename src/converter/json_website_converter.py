@@ -3,15 +3,20 @@ import re
 import json
 from typing import List, Dict, Tuple
 
-from src.converter.website_converter import IWebsiteConverter
+from converter.website_converter import IWebsiteConverter
 # End Imports
 
 
 class JsonWebsiteConverter(IWebsiteConverter):
     
     def __init__(self, json_file_path:str):
-        self.__file_data = None        
-        self.load_json_file(json_file_path)
+        self.__file_data = self.load_json_file(json_file_path)
+        
+    def create_website_list(self):
+        """ Return a list of websites."""
+        
+        return self.__file_data['websites']
+        
         
     def load_json_file(self, json_file_path:str) -> Dict[str, List[str]]:
         """ Given a file_path to a JSON file, load the JSON file and return a python dict of the data.
@@ -24,12 +29,12 @@ class JsonWebsiteConverter(IWebsiteConverter):
         """
         # Loads the JSON File.
         with open(json_file_path, 'r') as file:
-            self.__file_data = json.load(file)
+            file_data = json.load(file)
         
         # Checks the structure and content of the JSON File. 
         validation_checks = [
-            self.__validate_website_key(),
-            self.__website_presence_check()
+            self.__validate_website_key(file_data),
+            self.__website_presence_check(file_data)
             ]          
         
         for check, message in validation_checks:
@@ -37,10 +42,12 @@ class JsonWebsiteConverter(IWebsiteConverter):
                 continue
             
             else:
-                self.__file_data = None
+                file_data = None
                 raise Exception(message)
+            
+        return file_data
         
-    def __validate_website_key(self) -> Tuple[bool, str]:
+    def __validate_website_key(self, file_data:str) -> Tuple[bool, str]:
         """ Validates if necessary websites key exists.
 
         Returns:
@@ -50,12 +57,12 @@ class JsonWebsiteConverter(IWebsiteConverter):
         """
         
         # Return None if file data does not exist.
-        if not self.__file_data:
+        if not file_data:
             return None, None
         
         # Checks to see if necessary keys exists.
-        if "websites" not in self.__file_data:
-            error_message = "Issue with JSON structure, website key is missing"
+        if "websites" not in file_data:
+            error_message = "Issue with JSON structure, websites key is missing"
             return False, error_message
         
         return True, None
@@ -73,13 +80,13 @@ class JsonWebsiteConverter(IWebsiteConverter):
         """
 
         # Return None if file data does not exist.
-        if not self.__file_data:
+        if not file_data:
             return None, None
         
         # Get the list of websites
-        websites = self.__file_data.values() 
+        websites = file_data.values() 
         
-        if not isinstance(websites):
+        if not isinstance(websites, list):
             raise TypeError(f"Expected type:List got type:{type(websites)}")
         
         # Check top level domain to make sure item is a website.

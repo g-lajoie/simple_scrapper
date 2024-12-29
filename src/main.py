@@ -3,11 +3,12 @@ import asyncio
 import httpx
 from typing import Iterable
 
-from src.crawler import Crawler
-from src.main_queue import MainQueue
-from src.utils.get_websites import GetWebsites
+from crawler import Crawler
+from main_queue import MainQueue
+from utils.get_websites import GetWebsites
 
 # End Imports
+
 
 async def main():
     
@@ -15,31 +16,36 @@ async def main():
     Queue = MainQueue() 
     
     # Get website data.
-    website_getter = GetWebsites()
-    websites = website_getter.from_json("websites.json")
+    websites = GetWebsites()
+    websites.from_json('websites.json')
     
     # Add websites into Queue.
-    insert_website = asyncio.create_task(Queue.insert_website_list(websites))
+    insert_website = asyncio.create_task(Queue.insert_website_list(websites.websites))
     
+    # Get website from queue
+    async def website_consumer():
+        while True:
+            website = await Queue.get()
+            try:
+                print(website)
+            finally:
+                Queue.task_done()
+                
+    # Create Tasks to Consumer Website from Queue
+    num_wokers = 3
+    workers = [asyncio.create_task(website_consumer()) for _ in num_wokers]
+        
+    # Ensure all websites have been inserted
+    await insert_website
     
-    async with httpx.AsyncClient() as client:
-        crawler = Crawler(
-            client = client,
-            urls = websites,
-            workers = 5,
-            limit = 30
-        )
-
-        await crawler.run()
-
-    seen = sorted(crawler.seen)
+    # Wait until all items of the Queeu have been consumed
+    await Queue.join()
     
-    print("Results:")
-    for url in seen:
-        print(url)
-
-    print(f"Crawled: {len(crawler.done)} URLs")
-    print(f"Found: {len(seen)} URLs")
+    # Cancled Remaining workers
+    _ = [worker.cancel() for worker in workers]
+    
+    # Wait for workers to handle cancellation
+    await asyncio.gather(*workers, return_exceptions = True)    
 
 if __name__ == "__main__":
     asyncio.run(main(), debug = True)
