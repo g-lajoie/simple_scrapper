@@ -1,19 +1,21 @@
 # Imports
-from .json_website_converter import JsonWebsiteConverter
+from src.converter.json_website_converter import JsonWebsiteConverter
 from typing import Dict, Any
 
 # End Imports
 
-# Create Type Alias
+# Type Aliases
 JSON = Dict[str, Any]
 
-class UrlListGenerator():
+# Implementation
+class GetWebsites():
     
     def __init__(self):
-        self.from_json:JSON | None = None
+        self.from_json:str | None = None
         
     def get_websites(self):
         """Generates the websites according to which attribute is used"""
         
         if self.from_json is not None:
-            return JsonWebsiteConverter().create_websites()
+            return JsonWebsiteConverter(self.from_json).create_websites()
+        

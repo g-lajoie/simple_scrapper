@@ -5,15 +5,19 @@ import httpx
 import json
 from typing import Iterable
 
-from crawler import Crawler
+from src.crawler import Crawler
+from src.main_queue import MainQueue
+from src.utils.get_websites import GetWebsites
+
 # End Imports
 
 async def main():
     
-    with open('websites.json', 'r') as json_file:
-        websites = json.load(json_file)  
-        
-    print(websites)  
+    # Get website data.
+    website_getter = GetWebsites()
+    website_getter.from_json("websites.json")
+            
+    Queue = MainQueue() 
     
     async with httpx.AsyncClient() as client:
         crawler = Crawler(
