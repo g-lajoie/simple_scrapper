@@ -1,8 +1,6 @@
 # Imports
-import time
 import asyncio
 import httpx
-import json
 from typing import Iterable
 
 from src.crawler import Crawler
@@ -13,11 +11,16 @@ from src.utils.get_websites import GetWebsites
 
 async def main():
     
+    # Intializes Main Queue.
+    Queue = MainQueue() 
+    
     # Get website data.
     website_getter = GetWebsites()
-    website_getter.from_json("websites.json")
-            
-    Queue = MainQueue() 
+    websites = website_getter.from_json("websites.json")
+    
+    # Add websites into Queue.
+    insert_website = asyncio.create_task(Queue.insert_website_list(websites))
+    
     
     async with httpx.AsyncClient() as client:
         crawler = Crawler(
