@@ -23,4 +23,4 @@ async def test_insert_website_list(main_queue):
     while not main_queue.empty():
         contents.append(await main_queue.get())
         
-    assert contents == data_listp
+    assert contents == data_list
