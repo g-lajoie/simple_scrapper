@@ -14,13 +14,34 @@ def main_queue():
 
 @pytest.mark.asyncio
 async def test_insert_website_list(main_queue):
-    data_list = ['a', 'b', 'c']
+    # Define data and create instance of MainQueue
+    websites = ["example1.com", "example2.org", "example3.com"]
+    MQ = main_queue
     
-    await main_queue.insert_website_list(data_list)
+    # Execute Function
+    await MQ.insert_website_list(websites)
     
     # Extract the contents from the queue
     contents = []
-    while not main_queue.empty():
-        contents.append(await main_queue.get())
+    while not MQ.empty():
+        contents.append(await MQ.get())
+    
+    # Test Results
+    assert contents == websites
+    
+@pytest.mark.asyncio
+async def test_insert_website(main_queue):
+    # Define data and create instance of MainQueue
+    website = "example1.com"
+    MQ = main_queue
+    
+    # Execute Function
+    await MQ.insert_website(website)
+    
+    # Extract the content from the queue
+    contents = []
+    while not MQ.empty():
+        contents.append(await MQ.get())
         
-    assert contents == data_list
+    # Test Results
+    assert contents == [website]
