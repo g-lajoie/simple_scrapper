@@ -3,55 +3,58 @@ import asyncio
 import httpx
 from typing import Iterable
 
-from queue import MainQueue, MainQueueManager
+from queue import MainQueue
+from serializer import JSONDeserializer
 from scraper import Scraper
 
 # End Imports
 
 
-async def main():
+async def main(num_workers = 3):
     
     # Get website data.
-    websites = MainQueueManager().from_json('websites.json')
+    websites = JSONDeserializer('websites.json')
 
     # Intializes Main Queue.
-    Queue = MainQueue() 
+    main_queue = MainQueue() 
     
     # Add websites into Queue.
-    insert_website = asyncio.create_task(Queue.insert_into_queue(websites))
+    insert_website = asyncio.create_task(main_queue.put_websites(websites))
     
-    # Get websites from Queue & Scrape the website
-    websites_from_queue = Queue.get_websites()
-    Scrape = Scraper(websites_from_queue)
-    
-    get_website = asyncio.create_task(Queue.get_website())
-    
-    
-
-    # Get website from queue
-    async def website_consumer():
+    async def scrape_website():
         while True:
-            website = await Queue.get()
+            # Get the next item from main_queue
+            website_from_queue = await main_queue.get()
+
+            # Scape the data
+            if website_from_queue is None:
+                # Sentinel value is receieved, exiting the loop.
+                main_queue.task_done()
+                break
+
             try:
-                print(website)
+                scraper = Scraper(website_from_queue)
+                results = await scraper.scrape()
+                return results
+
             finally:
-                Queue.task_done()
+                main_queue.task_done()
                 
     # Create Tasks to Consumer Website from Queue
-    num_wokers = 3
-    workers = [asyncio.create_task(website_consumer()) for _ in num_wokers]
+    workers = [scrape_website for _ in range(num_workers)]
         
     # Ensure all websites have been inserted
     await insert_website
+
+    # Ensure that all websites have been scraped.
+    await asyncio.gather(*workers, return_exceptions=True)
+
+    # Add sentinel values to exit.
+    for _ in range(num_workers):
+        await main_queue.put(None)
     
     # Wait until all items of the Queeu have been consumed
-    await Queue.join()
-    
-    # Cancled Remaining workers
-    _ = [worker.cancel() for worker in workers]
-    
-    # Wait for workers to handle cancellation
-    await asyncio.gather(*workers, return_exceptions = True)    
+    await asyncio.gather(*workers, return_exceptions = True)
 
 if __name__ == "__main__":
     asyncio.run(main(), debug = True)

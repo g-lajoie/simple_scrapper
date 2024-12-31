@@ -1,6 +1,7 @@
 # Imports
 import asyncio
 from typing import List
+from src.serializer import Deserializer
 
 # End Imports
 
@@ -15,13 +16,18 @@ class MainQueue(asyncio.Queue):
     
         return cls.__instance
     
-    def __init__(self):
+    def __init__(self, deserializer:Deserializer):
         if not hasattr(self, "_intialized"):
             super().__init__()
             self._intialized = True
+        
+        self.website_list = deserializer.create_website_list()
             
-    async def insert_into_queue(self, website:List[str] | str):
+    async def put_websites(self, website:List[str] | str = None):
         """ Inserts a website(of type str) or websites (of type list) into the queue"""
+        if website is None:
+            website = self.website_list
+
         if not isinstance(website, (list, str)):
             return TypeError(f"Expected list or str, instead got {type(website)}")
 

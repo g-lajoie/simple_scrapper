@@ -3,11 +3,10 @@ import re
 import json
 from typing import List, Dict, Tuple
 
-from serializer.deserializer import Deserializer
 # End Imports
 
 
-class JSONDeserializer(Deserializer):
+class JSONDeserializer:
     
     def __init__(self, json_file_path:str):
         self.__file_data = self.load_json_file(json_file_path)
