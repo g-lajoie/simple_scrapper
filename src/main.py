@@ -20,7 +20,10 @@ async def main(num_workers = 3):
     
     # Add websites into Queue.
     insert_website = asyncio.create_task(main_queue.put_websites(websites))
-    
+
+    # Define Results List
+    results = []
+
     async def scrape_website():
         while True:
             # Get the next item from main_queue
@@ -34,27 +37,28 @@ async def main(num_workers = 3):
 
             try:
                 scraper = Scraper(website_from_queue)
-                results = await scraper.scrape()
-                return results
+                results.append(await scraper.scrape())
 
             finally:
                 main_queue.task_done()
                 
     # Create Tasks to Consumer Website from Queue
-    workers = [scrape_website for _ in range(num_workers)]
+    workers = [asyncio.create_task(scrape_website) for _ in range(num_workers)]
         
     # Ensure all websites have been inserted
     await insert_website
-
-    # Ensure that all websites have been scraped.
-    await asyncio.gather(*workers, return_exceptions=True)
 
     # Add sentinel values to exit.
     for _ in range(num_workers):
         await main_queue.put(None)
     
+    # Ensure that all websites have been scraped.
+    await main_queue.join()
+
     # Wait until all items of the Queeu have been consumed
     await asyncio.gather(*workers, return_exceptions = True)
+
+    # Export results data
 
 if __name__ == "__main__":
     asyncio.run(main(), debug = True)
