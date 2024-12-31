@@ -1,7 +1,7 @@
 # Imports
 import pytest
 import asyncio
-from src.main_queue import MainQueue
+from src.queue import MainQueue
 
 # End Imports
 
