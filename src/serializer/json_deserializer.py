@@ -3,18 +3,17 @@ import re
 import json
 from typing import List, Dict, Tuple
 
-from converter.website_converter import IWebsiteConverter
+from serializer.deserializer import Deserializer
 # End Imports
 
 
-class JsonWebsiteConverter(IWebsiteConverter):
+class JSONDeserializer(Deserializer):
     
     def __init__(self, json_file_path:str):
         self.__file_data = self.load_json_file(json_file_path)
         
     def create_website_list(self):
         """ Return a list of websites."""
-        
         return self.__file_data['websites']
         
         

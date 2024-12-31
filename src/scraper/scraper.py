@@ -4,12 +4,20 @@ from bs4 import BeautifulSoup
 import asyncio
 import json
 import requests
+from typing import Protocol
 # End Imports
+
+class IWebsiteGetter(Protocol):
+    pass
+
+    def get_website():
+        """ Implement get_website method"""
+
 
 class Scraper:
     
-    def __init__(self, queue:asyncio.Queue):
-        self.queue = queue
+    def __init__(self, website_getter: IWebsiteGetter):
+        self.websites = website_getter
         
     def workers(self):
         pass

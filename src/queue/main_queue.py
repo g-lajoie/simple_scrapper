@@ -20,11 +20,16 @@ class MainQueue(asyncio.Queue):
             super().__init__()
             self._intialized = True
             
-    async def insert_website_list(self, website_list:List[str]):
-        """ Inserts a list of website into the main queue"""
-        for item in website_list:
-            await super().put(item)
-    
-    async def insert_website(self, website:str):
-        """ Insert a single website into the main queue."""
-        await super().put(website)
+    async def insert_into_queue(self, website:List[str] | str):
+        """ Inserts a website(of type str) or websites (of type list) into the queue"""
+        if not isinstance(website, (list, str)):
+            return TypeError(f"Expected list or str, instead got {type(website)}")
+
+        website_type = type(website)
+
+        if website_type is list:
+            for item in list:
+                super().put(item)
+
+        if website_type is str:
+            super().put(website)

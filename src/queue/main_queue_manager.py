@@ -1,5 +1,5 @@
 # Imports
-from converter.json_website_converter import JsonWebsiteConverter
+from src.serializer import Deserializer
 from typing import Dict, Any, List
 
 # End Imports
@@ -8,16 +8,13 @@ from typing import Dict, Any, List
 JSON = Dict[str, Any]
 
 # Implementation
-class GetWebsites():
-    def __init__(self):
+class MainQueueManager():
+    def __init__(self, deserializer:Deserializer):
         self.websites:List = []
+        self.deserializer = deserializer
             
     def get_websites(self):       
-        return self.webstites
-    
-    def from_json(self, json_path:str):
-        """ Add websites from json into self.websites attribute"""
-        return self.insert_into_websites('json', path = json_path)
+        return self.deserializer.create_website_list()
     
     def insert_into_websites(self, type:str, path:str = None):
         # Enforce format for type parameter.

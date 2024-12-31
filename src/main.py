@@ -3,25 +3,31 @@ import asyncio
 import httpx
 from typing import Iterable
 
-from crawler import Crawler
-from main_queue import MainQueue
-from utils.get_websites import GetWebsites
+from queue import MainQueue, MainQueueManager
+from scraper import Scraper
 
 # End Imports
 
 
 async def main():
     
+    # Get website data.
+    websites = MainQueueManager().from_json('websites.json')
+
     # Intializes Main Queue.
     Queue = MainQueue() 
     
-    # Get website data.
-    websites = GetWebsites()
-    websites.from_json('websites.json')
-    
     # Add websites into Queue.
-    insert_website = asyncio.create_task(Queue.insert_website_list(websites.websites))
+    insert_website = asyncio.create_task(Queue.insert_into_queue(websites))
     
+    # Get websites from Queue & Scrape the website
+    websites_from_queue = Queue.get_websites()
+    Scrape = Scraper(websites_from_queue)
+    
+    get_website = asyncio.create_task(Queue.get_website())
+    
+    
+
     # Get website from queue
     async def website_consumer():
         while True:
