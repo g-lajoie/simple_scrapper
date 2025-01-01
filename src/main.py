@@ -13,7 +13,7 @@ from scraper import Scraper
 async def main(num_workers = 3):
     
     # Get website data.
-    websites = JSONDeserializer('websites.json')
+    websites = JSONDeserializer('websites.json').websites
 
     # Intializes Main Queue.
     main_queue = MainQueue() 

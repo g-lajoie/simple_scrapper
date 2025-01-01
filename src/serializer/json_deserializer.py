@@ -3,83 +3,64 @@ import re
 import json
 from typing import List, Dict, Tuple
 
+from src.utils import valid_top_level_domains
 # End Imports
 
 
 class JSONDeserializer:
-    
-    def __init__(self, json_file_path:str):
-        self.__file_data = self.load_json_file(json_file_path)
+    def __init__(self, json_file_path:str, filter_websites:bool = False):
+        self.filter_websites = filter_websites
+        self.file_data = self.load_json_file
         
-    def create_website_list(self):
-        """ Return a list of websites."""
-        return self.__file_data['websites']
-        
+        # Load the JSON File and Create a list of websites
+        self.websites = self._create_website_list(json_file_path)
         
     def load_json_file(self, json_file_path:str) -> Dict[str, List[str]]:
-        """ Given a file_path to a JSON file, load the JSON file and return a python dict of the data.
-
-        Args:
-            json_file_path (_type_): A file path that leads to JSON Data.
-
-        Returns:
-            Dict[str, List[str]]: Return a dictionary of the JSON data.
-        """
+        """ Return a dictionary from JSON"""
         # Loads the JSON File.
         with open(json_file_path, 'r') as file:
             file_data = json.load(file)
         
-        # Checks the structure and content of the JSON File. 
-        validation_checks = [
-            self.__validate_website_key(file_data),
-            self.__website_presence_check(file_data)
-            ]          
-        
-        for check, message in validation_checks:
-            if check:
-                continue
-            
-            else:
-                file_data = None
-                raise Exception(message)
-            
         return file_data
+            
+    def _create_website_list(self) -> List[str]:
+        """ Given a file_path to a JSON file, load the JSON file and return a list of websites. """
         
-    def __validate_website_key(self, file_data:str) -> Tuple[bool, str]:
+        # Check the JSON structure.
+        if self.__validate_website_key(necessary_key = 'websites'):
+            pass
+        
+        # Check website list in JSON.
+        if self.__validate_domain():
+            pass
+            
+        return self.file_data['websites']
+        
+    def __validate_website_key(self, necessary_key:str, file_data:dict = None) -> Tuple[bool, str]:
         """ Validates if necessary websites key exists.
 
+        Raises:
+            TypeError: If website key not in file_data dictionary. 
+            
         Returns:
-            (None, None): If file_data is not present
-            (True, None): If all validation check pass.)
-            (False, error_message): If at least one validation check fails
+            True: If validation check pass.
         """
-        
-        # Return None if file data does not exist.
-        if not file_data:
-            return None, None
+        # Default file_data to self parameter
+        if file_data is None:
+            file_data = self.file_data
         
         # Checks to see if necessary keys exists.
-        if "websites" not in file_data:
-            error_message = "Issue with JSON structure, websites key is missing"
-            return False, error_message
+        if necessary_key not in file_data:
+            raise KeyError("Issue with JSON structure, websites key is missing")
         
-        return True, None
+        return True
+    
+    def __validate_domain(self, file_data:dict = None) -> Tuple[bool, str]:
+        """ Validates if all domain checks pass. """
         
-    def __website_presence_check(self, file_data:str) -> bool:
-        """ Validates if data contains websites.
-        
-        Raises:
-            TypeError: If values in dict is not list.
-
-        Returns:
-            (None, None): If file_data is not present
-            (True, None): If all validation check pass.)
-            (False, error_message): If at least one validation check fails
-        """
-
-        # Return None if file data does not exist.
-        if not file_data:
-            return None, None
+        # Default file_data to self parameter
+        if file_data is None:
+            file_data = self.file_data
         
         # Get the list of websites
         websites = file_data.values() 
@@ -87,21 +68,48 @@ class JSONDeserializer:
         if not isinstance(websites, list):
             raise TypeError(f"Expected type:List got type:{type(websites)}")
         
-        # Check top level domain to make sure item is a website.
-        search_result = bool(re.search(r"\.com|\.org|\.edu|\.net", websites, re.IGNORECASE))
+        domain_validators = [
+            self.__validate_top_level_domain(websites)]
         
-        # Check to see if any white spaces are in the string.
-        white_space_result = bool(re.fullmatch(r'\S*', websites))
+        if all(domain_validators):
+            return True            
         
-        # Complies all check in a List       
-        results = [search_result, white_space_result]
+    def __validate_top_level_domain(self, website_list:List[str]) -> bool:
+        """ Validates if valid top level domain exits is given.
+
+        Raises:
+            
+            
+        Returns:
+            True: If validation check pass.
+            False: If validaiton check fail
+            
+            List[str]: If filter website is True.
+        """
         
-        # Error Message. 
-        error_message = "Issue with website data"
+        # Obtain a list of valid top level domains and define pattern.
+        tld_list = [rf"\{tld}$" for tld in valid_top_level_domains()]
         
-        # Return True if all test pass.
-        if not all(results):
-            return False, error_message
+        # Define the returned re.search list.
+        checked_websites = []
+
+        for tld_pattern in tld_list:
+            for website in website_list:
+                checked_websites.append(re.search(tld_pattern, website, re.IGNORECASE))
+
+        # If all websites fail the check.
+        if not checked_websites:
+            raise Exception("All websites failed check, check to make sure website contain top level domains")
         
-        else:
-            return True, None
+        # If some websites fail the check.
+        """ If self.filter_websites set to True then will return only websites that pass check, else fails """
+        
+        if not set(checked_websites).issubset(website_list):
+            if self.filter_websites == True:
+                self.file_data['websites'] = checked_websites
+            
+            else:
+                return False
+            
+        if set(checked_websites).issubset(website_list):
+            return True
