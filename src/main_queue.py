@@ -1,7 +1,7 @@
 # Imports
 import asyncio
 from typing import List
-from src.serializer import Deserializer
+from serializer import Deserializer
 
 # End Imports
 
@@ -21,21 +21,22 @@ class MainQueue(asyncio.Queue):
             super().__init__()
             self._intialized = True
         
-        self.website_list = deserializer.create_website_list()
+        self._websites = deserializer._create_website_list()
             
-    async def put_websites(self, website:List[str] | str = None):
-        """ Inserts a website(of type str) or websites (of type list) into the queue"""
-        if website is None:
-            website = self.website_list
+    async def put_websites(self):
+        """ Inserts a website(type:List[str]) or websites (type:str) into the queue"""
 
-        if not isinstance(website, (list, str)):
-            return TypeError(f"Expected list or str, instead got {type(website)}")
+        # Define Website Type
+        website_type = type(self._websites)
+        
+        # Raise Error for Wrong Type
+        if not isinstance(self._websites, (list, str)):
+            raise TypeError(f"Expected list or str, instead got {type(website_type)}")
 
-        website_type = type(website)
-
+        # Add item(s) to the Queue
         if website_type is list:
-            for item in list:
-                super().put(item)
+            for item in self._websites:
+                await super().put(item)
 
         if website_type is str:
-            super().put(website)
+            await super().put(self._websites)

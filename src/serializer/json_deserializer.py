@@ -3,17 +3,14 @@ import re
 import json
 from typing import List, Dict, Tuple
 
-from src.utils import valid_top_level_domains
+from utils import valid_top_level_domains
 # End Imports
 
 
 class JSONDeserializer:
     def __init__(self, json_file_path:str, filter_websites:bool = False):
         self.filter_websites = filter_websites
-        self.file_data = self.load_json_file
-        
-        # Load the JSON File and Create a list of websites
-        self.websites = self._create_website_list(json_file_path)
+        self.file_data = self.load_json_file(json_file_path)
         
     def load_json_file(self, json_file_path:str) -> Dict[str, List[str]]:
         """ Return a dictionary from JSON"""
@@ -63,7 +60,7 @@ class JSONDeserializer:
             file_data = self.file_data
         
         # Get the list of websites
-        websites = file_data.values() 
+        websites = file_data['websites']
         
         if not isinstance(websites, list):
             raise TypeError(f"Expected type:List got type:{type(websites)}")

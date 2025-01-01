@@ -1,25 +1,34 @@
 # Imports
 import asyncio
-import httpx
-from typing import Iterable
+import logging
+import sys
 
-from queue import MainQueue
-from serializer import JSONDeserializer, StandardSerializer
-from scraper import Scraper
+from main_queue import MainQueue
+from serializer import JSONDeserializer
+from scraper import StandardScraper
 
 # End Imports
 
 
 async def main(num_workers = 3):
     
+    # Configure Root Logger
+    logging.basicConfig(
+        level = logging.INFO, 
+        format = '%(asctime)s - %(levelname)s - %(message)s',
+        datefmt = '%Y-%m-%d %H:%M:%S'
+    )
+    
     # Get website data.
-    websites = JSONDeserializer('websites.json').websites
+    logging.info("Retreiving websites from JSON File")
+    website_deserializer = JSONDeserializer('websites.json')
 
     # Intializes Main Queue.
-    main_queue = MainQueue() 
+    main_queue = MainQueue(website_deserializer) 
     
     # Add websites into Queue.
-    insert_website = asyncio.create_task(main_queue.put_websites(websites))
+    logging.info("Adding items to Main Queue")
+    insert_website = asyncio.create_task(main_queue.put_websites())
 
     # Define Results List
     results = {}
@@ -36,18 +45,24 @@ async def main(num_workers = 3):
                 break
 
             try:
-                scraper = Scraper(website_from_queue)
-                serialized_content = StandardSerializer().serialize(scraper)
-                results[website_from_queue] = serialized_content
+                scraper = StandardScraper(website_from_queue)
+                results[website_from_queue] = scraper.scrape()
 
             finally:
                 main_queue.task_done()
                 
     # Create Tasks to Consumer Website from Queue
-    workers = [asyncio.create_task(scrape_website) for _ in range(num_workers)]
+    logging.info("Started Scraping Websites")
+    try:
+        workers = [asyncio.create_task(scrape_website()) for _ in range(num_workers)]
+    
+    except:
+        logging.error('An Error Occured')
+        sys.exit(1)        
         
     # Ensure all websites have been inserted
     await insert_website
+    logging.info("All items have been added to Main Queue")
 
     # Add sentinel values to exit.
     for _ in range(num_workers):
@@ -55,12 +70,13 @@ async def main(num_workers = 3):
     
     # Ensure that all websites have been scraped.
     await main_queue.join()
+    logging.info("All websites have been scrapped")
 
     # Wait until all items of the Queeu have been consumed
-    await asyncio.gather(*workers, return_exceptions = True)
+    await asyncio.gather(*workers)
 
     # Export results data
-    return results
+    print(results)
     
 if __name__ == "__main__":
     asyncio.run(main(), debug = True)
