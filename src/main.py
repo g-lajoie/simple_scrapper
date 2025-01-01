@@ -4,7 +4,7 @@ import httpx
 from typing import Iterable
 
 from queue import MainQueue
-from serializer import JSONDeserializer
+from serializer import JSONDeserializer, StandardSerializer
 from scraper import Scraper
 
 # End Imports
@@ -22,7 +22,7 @@ async def main(num_workers = 3):
     insert_website = asyncio.create_task(main_queue.put_websites(websites))
 
     # Define Results List
-    results = []
+    results = {}
 
     async def scrape_website():
         while True:
@@ -37,7 +37,8 @@ async def main(num_workers = 3):
 
             try:
                 scraper = Scraper(website_from_queue)
-                results.append(await scraper.scrape())
+                serialized_content = StandardSerializer().serialize(scraper)
+                results[website_from_queue] = serialized_content
 
             finally:
                 main_queue.task_done()
@@ -59,6 +60,7 @@ async def main(num_workers = 3):
     await asyncio.gather(*workers, return_exceptions = True)
 
     # Export results data
-
+    return results
+    
 if __name__ == "__main__":
     asyncio.run(main(), debug = True)
